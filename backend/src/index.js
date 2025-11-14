@@ -26,7 +26,7 @@ await connectDB();
 // Rutas
 app.get("/api/health", (req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use("/api/auth", authRoutes);
-app.use("/api/user-registers", userRegisterRoutes);
+app.use("/api/user-register", userRegisterRoutes);
 
 // Arranque
 const PORT = process.env.PORT || 4000;
