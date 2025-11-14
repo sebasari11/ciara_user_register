@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthSection from '../components/AuthSection.astro';
+import AppSection from '../components/AppSection.astro';
+---
+
+<Layout>
+  <AuthSection />
+  <AppSection />
+</Layout>
+
+<script>
+  // Initialize app state on page load
+  import { authService } from '../lib/authService';
+  import { showApp } from '../lib/appState';
+
+  // Check authentication status and show appropriate section
+  if (typeof window !== 'undefined') {
+    const isAuthed = authService.isAuthenticated();
+    showApp(isAuthed);
+  }
+</script>
+

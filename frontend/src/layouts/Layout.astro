@@ -1,0 +1,27 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "CIARA Registro de Usuarios" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Aplicación de demostración de autenticación con JWT y gestión de registros" />
+    <title>{title}</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Registros de usuarios</h1>
+      </header>
+      <slot />
+    </main>
+  </body>
+</html>
+

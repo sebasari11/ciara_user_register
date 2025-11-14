@@ -1,0 +1,94 @@
+---
+// AuthSection component - handles login and registration
+---
+
+<section id="auth-section" aria-labelledby="auth-heading">
+  <h2 id="auth-heading">Autenticación</h2>
+  <div class="card">
+    <form id="login-form" aria-label="Formulario de inicio de sesión">
+      <label for="email">
+        Email
+        <input 
+          type="email" 
+          id="email" 
+          name="email"
+          required 
+          autocomplete="email"
+          aria-required="true"
+        />
+      </label>
+      <label for="password">
+        Contraseña
+        <input 
+          type="password" 
+          id="password" 
+          name="password"
+          required 
+          autocomplete="current-password"
+          aria-required="true"
+        />
+      </label>
+      <button type="submit">Iniciar sesión</button>
+    </form>
+    <p class="muted">
+      ¿No tienes cuenta?
+      <button id="seed-btn" type="button" aria-label="Crear usuario de prueba">
+        Crear usuario
+      </button>
+    </p>
+    <p id="auth-msg" role="status" aria-live="polite" aria-atomic="true"></p>
+  </div>
+</section>
+
+<script>
+  import { authService } from '../lib/authService';
+  import { showApp } from '../lib/appState';
+
+  const authSection = document.getElementById("auth-section");
+  const authMsg = document.getElementById("auth-msg");
+  const loginForm = document.getElementById("login-form");
+  const seedBtn = document.getElementById("seed-btn");
+
+  async function handleLogin(e: Event) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const email = (form.querySelector('#email') as HTMLInputElement).value.trim();
+    const password = (form.querySelector('#password') as HTMLInputElement).value;
+
+    authMsg.textContent = "Autenticando...";
+    
+    try {
+      const result = await authService.login(email, password);
+      if (result.success) {
+        authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
+        showApp(true);
+      } else {
+        authMsg.textContent = result.error || "Login falló";
+      }
+    } catch (error) {
+      authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      console.error("Login error:", error);
+    }
+  }
+
+  async function handleRegisterSeed() {
+    authMsg.textContent = "Registrando usuario...";
+    
+    try {
+      const result = await authService.registerSeed();
+      if (result.success) {
+        authMsg.textContent = "Usuario creado y logueado como demo@example.com";
+        showApp(true);
+      } else {
+        authMsg.textContent = result.error || "No se pudo registrar";
+      }
+    } catch (error) {
+      authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      console.error("Register error:", error);
+    }
+  }
+
+  loginForm?.addEventListener("submit", handleLogin);
+  seedBtn?.addEventListener("click", handleRegisterSeed);
+</script>
+

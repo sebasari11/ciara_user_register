@@ -1,0 +1,252 @@
+---
+// AppSection component - handles user register creation and listing
+---
+
+<section id="app-section" class="hidden" aria-labelledby="app-heading">
+  <div class="row">
+    <div>
+      <h2 id="app-heading">Nuevo registro de usuario</h2>
+      <div class="card">
+        <form id="register-form" aria-label="Formulario de registro de usuario">
+          <label for="email">
+            Email
+            <input 
+              type="email" 
+              id="email" 
+              name="email"
+              required 
+              autocomplete="email"
+              aria-required="true"
+            />
+          </label>
+          <label for="cedula">
+            Cédula
+            <input 
+              type="text" 
+              id="cedula" 
+              name="cedula"
+              required 
+              aria-required="true"
+              pattern="[0-9]+"
+              title="Solo números"
+            />
+          </label>
+          <label for="edad">
+            Edad
+            <input 
+              type="number" 
+              id="edad" 
+              name="edad"
+              required 
+              min="1"
+              max="120"
+              aria-required="true"
+            />
+          </label>
+          <label for="genero">
+            Género
+            <select 
+              id="genero" 
+              name="genero"
+              required 
+              aria-required="true"
+            >
+              <option value="">Seleccione...</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+              <option value="prefiero-no-decir">Prefiero no decir</option>
+            </select>
+          </label>
+          <label for="so">
+            Sistema Operativo
+            <select 
+              id="so" 
+              name="so"
+              required 
+              aria-required="true"
+            >
+              <option value="">Seleccione...</option>
+              <option value="windows">Windows</option>
+              <option value="macos">macOS</option>
+              <option value="linux">Linux</option>
+              <option value="android">Android</option>
+              <option value="ios">iOS</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <label for="movilidad">
+            Movilidad
+            <input 
+              type="text" 
+              id="movilidad" 
+              name="movilidad"
+              required 
+              aria-required="true"
+            />
+          </label>
+          <label for="tiempoDiario">
+            Tiempo diario
+            <input 
+              type="text" 
+              id="tiempoDiario" 
+              name="tiempoDiario"
+              required 
+              placeholder="Ej: 4 horas"
+              aria-required="true"
+            />
+          </label>
+          <label for="universidad">
+            Universidad
+            <input 
+              type="text" 
+              id="universidad" 
+              name="universidad"
+              required 
+              aria-required="true"
+            />
+          </label>
+          <label for="carrera">
+            Carrera
+            <input 
+              type="text" 
+              id="carrera" 
+              name="carrera"
+              required 
+              aria-required="true"
+            />
+          </label>
+          <label for="telefono">
+            Teléfono
+            <input 
+              type="tel" 
+              id="telefono" 
+              name="telefono"
+              required 
+              autocomplete="tel"
+              aria-required="true"
+            />
+          </label>
+          <button type="submit">Guardar</button>
+        </form>
+        <button id="logout-btn" type="button" class="secondary" aria-label="Cerrar sesión">
+          Cerrar sesión
+        </button>
+        <p id="save-msg" role="status" aria-live="polite" aria-atomic="true"></p>
+      </div>
+    </div>
+
+    <div>
+      <h2>Mis registros</h2>
+      <div class="card">
+        <button id="reload-btn" type="button" aria-label="Recargar lista de registros">
+          Recargar
+        </button>
+        <ul id="registers" role="list" aria-label="Lista de registros de usuarios"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { authService } from '../lib/authService';
+  import { userRegisterService } from '../lib/recordsService';
+  import { showApp } from '../lib/appState';
+
+  const appSection = document.getElementById("app-section");
+  const saveMsg = document.getElementById("save-msg");
+  const registersList = document.getElementById("registers");
+  const registerForm = document.getElementById("register-form");
+  const reloadBtn = document.getElementById("reload-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  async function handleSaveUserRegister(e: Event) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    
+    const registerData = {
+      email: (form.querySelector('#email') as HTMLInputElement).value.trim(),
+      cedula: (form.querySelector('#cedula') as HTMLInputElement).value.trim(),
+      edad: Number((form.querySelector('#edad') as HTMLInputElement).value),
+      genero: (form.querySelector('#genero') as HTMLSelectElement).value,
+      so: (form.querySelector('#so') as HTMLSelectElement).value,
+      movilidad: (form.querySelector('#movilidad') as HTMLSelectElement).value,
+      tiempoDiario: (form.querySelector('#tiempoDiario') as HTMLInputElement).value.trim(),
+      universidad: (form.querySelector('#universidad') as HTMLInputElement).value.trim(),
+      carrera: (form.querySelector('#carrera') as HTMLInputElement).value.trim(),
+      telefono: (form.querySelector('#telefono') as HTMLInputElement).value.trim()
+    };
+
+    saveMsg.textContent = "Guardando...";
+    
+    try {
+      const result = await userRegisterService.saveUserRegister(registerData);
+      if (result.success) {
+        saveMsg.textContent = "Registro creado ✔";
+        form.reset();
+        await loadUserRegisters();
+      } else {
+        saveMsg.textContent = result.error || "Error al guardar";
+      }
+    } catch (error) {
+      saveMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      console.error("Save user register error:", error);
+    }
+  }
+
+  async function loadUserRegisters() {
+    if (!registersList) return;
+    
+    registersList.innerHTML = "<li>Cargando...</li>";
+    
+    try {
+      const result = await userRegisterService.loadUserRegisters();
+      if (result.success && result.registers) {
+        registersList.innerHTML = "";
+        if (result.registers.length === 0) {
+          registersList.innerHTML = "<li>(Sin registros)</li>";
+          return;
+        }
+        result.registers.forEach((r) => {
+          const li = document.createElement("li");
+          const date = r.createdAt ? new Date(r.createdAt).toLocaleString('es-ES') : 'Sin fecha';
+          li.innerHTML = `
+            <strong>${r.email}</strong> - ${r.cedula}<br>
+            <small>${r.edad} años, ${r.genero} | ${r.universidad} - ${r.carrera}</small><br>
+            <small>SO: ${r.so} | Movilidad: ${r.movilidad} | Tiempo: ${r.tiempoDiario}</small><br>
+            <small>Tel: ${r.telefono} | ${date}</small>
+          `;
+          registersList.appendChild(li);
+        });
+      } else {
+        registersList.innerHTML = `<li>${result.error || "Error al listar"}</li>`;
+      }
+    } catch (error) {
+      registersList.innerHTML = "<li>Error de conexión</li>";
+      console.error("Load user registers error:", error);
+    }
+  }
+
+  function handleLogout() {
+    authService.logout();
+    showApp(false);
+  }
+
+  registerForm?.addEventListener("submit", handleSaveUserRegister);
+  reloadBtn?.addEventListener("click", loadUserRegisters);
+  logoutBtn?.addEventListener("click", handleLogout);
+
+  // Load registers when component becomes visible or on app-shown event
+  function checkAndLoadRegisters() {
+    if (appSection && !appSection.classList.contains("hidden")) {
+      loadUserRegisters();
+    }
+  }
+
+  // Listen for app-shown event from appState
+  window.addEventListener('app-shown', checkAndLoadRegisters);
+
+  // Initial load if already visible
+  checkAndLoadRegisters();
+</script>
+
