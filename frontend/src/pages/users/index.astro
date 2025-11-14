@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout>
-  <main class="container">
+  <main class="container users-container">
     <header>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
         <h1>Gestión de Usuarios</h1>
@@ -63,7 +63,7 @@ import Layout from '../../layouts/Layout.astro';
           </thead>
           <tbody id="users-tbody">
             <tr>
-              <td colspan="8" style="text-align: center; padding: 2rem;">
+              <td colspan="7" style="text-align: center; padding: 2rem;">
                 Cargando usuarios...
               </td>
             </tr>
@@ -162,7 +162,7 @@ import Layout from '../../layouts/Layout.astro';
     if (users.length === 0) {
       usersTbody.innerHTML = `
         <tr>
-          <td colspan="8" style="text-align: center; padding: 2rem;">
+          <td colspan="7" style="text-align: center; padding: 2rem;">
             No se encontraron usuarios
           </td>
         </tr>
@@ -172,13 +172,13 @@ import Layout from '../../layouts/Layout.astro';
 
     usersTbody.innerHTML = users.map(user => `
       <tr>
-        <td>${user.email}</td>
-        <td>${user.cedula}</td>
-        <td>${user.edad}</td>
-        <td>${user.genero}</td>
-        <td>${user.universidad}</td>
-        <td>${user.carrera}</td>
-        <td>${user.so}</td>
+        <td data-label="Email">${user.email}</td>
+        <td data-label="Cédula">${user.cedula}</td>
+        <td data-label="Edad">${user.edad}</td>
+        <td data-label="Género">${user.genero}</td>
+        <td data-label="Universidad">${user.universidad}</td>
+        <td data-label="Carrera">${user.carrera}</td>
+        <td data-label="SO">${user.so}</td>
       </tr>
     `).join('');
   }
@@ -212,7 +212,7 @@ import Layout from '../../layouts/Layout.astro';
   async function loadUsers() {
     usersTbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align: center; padding: 2rem;">
+        <td colspan="7" style="text-align: center; padding: 2rem;">
           Cargando usuarios...
         </td>
       </tr>
@@ -234,7 +234,7 @@ import Layout from '../../layouts/Layout.astro';
         showError(result.error || 'Error al cargar usuarios');
         usersTbody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--color-error);">
+            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--color-error);">
               ${result.error || 'Error al cargar usuarios'}
             </td>
           </tr>
@@ -307,6 +307,18 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
+  /* Container más ancho para la página de usuarios */
+  .users-container {
+    max-width: 1600px !important;
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+
+  @media (min-width: 1400px) {
+    .users-container {
+      max-width: 1800px !important;
+    }
+  }
+
   .btn-primary {
     background-color: var(--color-primary);
     color: white;
@@ -357,26 +369,49 @@ import Layout from '../../layouts/Layout.astro';
   .table-container {
     overflow-x: auto;
     margin-bottom: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
   }
 
   table {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     background-color: var(--color-bg);
   }
 
   thead {
-    background-color: var(--color-bg-secondary);
+    background: linear-gradient(to bottom, 
+      var(--color-bg-secondary) 0%, 
+      rgba(0, 0, 0, 0.02) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  thead tr {
     border-bottom: 2px solid var(--color-border);
   }
 
   th {
-    padding: 1rem;
+    padding: 1.5rem 1.25rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.9375rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    color: var(--color-text);
+    border-right: 1px solid var(--color-border);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  th:last-child {
+    border-right: none;
   }
 
   .sort-btn {
@@ -388,36 +423,92 @@ import Layout from '../../layouts/Layout.astro';
     text-align: left;
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     color: var(--color-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: color 0.2s ease;
+    position: relative;
   }
 
   .sort-btn:hover {
     color: var(--color-primary);
   }
 
+  .sort-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+
   .sort-indicator {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-primary);
+    font-weight: 700;
+    margin-left: 0.25rem;
+  }
+
+  tbody {
+    background-color: var(--color-bg);
   }
 
   tbody tr {
     border-bottom: 1px solid var(--color-border);
-    transition: background-color 0.2s ease;
+    transition: all 0.15s ease;
+    background-color: var(--color-bg);
+  }
+
+  /* Zebra striping para mejor legibilidad */
+  tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.015);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
   }
 
   tbody tr:hover {
-    background-color: var(--color-bg-secondary);
+    background-color: rgba(0, 102, 204, 0.08) !important;
+    transform: scale(1.001);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    tbody tr:hover {
+      background-color: rgba(74, 158, 255, 0.12) !important;
+    }
   }
 
   td {
-    padding: 1rem;
-    font-size: 0.9rem;
+    padding: 1.25rem 1rem;
+    font-size: 1rem;
+    color: var(--color-text);
+    border-right: 1px solid var(--color-border);
+    line-height: 1.6;
+    vertical-align: middle;
+  }
+
+  td:last-child {
+    border-right: none;
+  }
+
+  /* Mejora visual para celdas vacías o estados especiales */
+  tbody tr td[colspan] {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    border-right: none;
+  }
+
+  /* Card más espaciosa para la tabla */
+  .users-container .card {
+    padding: var(--spacing-xl);
   }
 
   .pagination-container {
@@ -468,6 +559,7 @@ import Layout from '../../layouts/Layout.astro';
     border-width: 0;
   }
 
+  /* Mejoras responsive para móviles */
   @media (max-width: 768px) {
     header {
       flex-direction: column;
@@ -480,11 +572,77 @@ import Layout from '../../layouts/Layout.astro';
     }
 
     .table-container {
-      font-size: 0.85rem;
+      border-radius: var(--radius-sm);
+      border-left: none;
+      border-right: none;
+      margin-left: calc(-1 * var(--spacing-lg));
+      margin-right: calc(-1 * var(--spacing-lg));
+      width: calc(100% + 2 * var(--spacing-lg));
     }
 
-    th, td {
-      padding: 0.5rem;
+    table {
+      font-size: 0.875rem;
+    }
+
+    thead {
+      display: none; /* Ocultar headers en móvil para ahorrar espacio */
+    }
+
+    tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      background-color: var(--color-bg-secondary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--color-bg-secondary);
+    }
+
+    tbody tr:hover {
+      transform: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    td {
+      display: block;
+      padding: 0.5rem 0;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      position: relative;
+      padding-left: 40%;
+    }
+
+    td:last-child {
+      border-bottom: none;
+    }
+
+    td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0;
+      width: 35%;
+      padding-right: 1rem;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    /* Para celdas con colspan (estados vacíos) */
+    td[colspan] {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-bottom: none;
+    }
+
+    td[colspan]::before {
+      display: none;
     }
 
     .pagination-container {
@@ -494,6 +652,18 @@ import Layout from '../../layouts/Layout.astro';
 
     .pagination-controls {
       justify-content: center;
+    }
+  }
+
+  /* Tablet optimizations */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    th, td {
+      padding: 0.875rem 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .sort-btn {
+      font-size: 0.8125rem;
     }
   }
 </style>
