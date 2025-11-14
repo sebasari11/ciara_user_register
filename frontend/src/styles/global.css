@@ -1,0 +1,360 @@
+/* ============================================
+   Global Styles - Modern, Responsive, Accessible
+   ============================================ */
+
+:root {
+  /* Color scheme with light/dark mode support */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-text: #1a1a1a;
+  --color-text-muted: #666666;
+  --color-border: rgba(136, 136, 136, 0.2);
+  --color-border-hover: rgba(136, 136, 136, 0.4);
+  --color-primary: #0066cc;
+  --color-primary-hover: #0052a3;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  
+  /* Typography */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+               'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  color-scheme: light dark;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a1a1a;
+    --color-bg-secondary: #2a2a2a;
+    --color-text: #e5e5e5;
+    --color-text-muted: #999999;
+    --color-border: rgba(255, 255, 255, 0.2);
+    --color-border-hover: rgba(255, 255, 255, 0.4);
+    --color-primary: #4a9eff;
+    --color-primary-hover: #6bb3ff;
+  }
+}
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  padding: var(--spacing-md);
+}
+
+/* ============================================
+   Layout
+   ============================================ */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+header {
+  margin-bottom: var(--spacing-xl);
+}
+
+h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   Card Component
+   ============================================ */
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-secondary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+
+label {
+  display: block;
+  margin-bottom: var(--spacing-md);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+input:invalid:not(:placeholder-shown) {
+  border-color: var(--color-error);
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  padding-right: calc(var(--spacing-xl) + var(--spacing-md));
+}
+
+select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230066cc' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+button {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  background-color: var(--color-primary);
+  color: white;
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  margin-top: var(--spacing-md);
+}
+
+button.secondary:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: var(--color-border-hover);
+}
+
+/* Inline button (for muted text) */
+.muted button {
+  width: auto;
+  display: inline;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-left: var(--spacing-xs);
+  font-size: 0.9rem;
+  background-color: transparent;
+  color: var(--color-primary);
+  text-decoration: underline;
+  border: none;
+}
+
+.muted button:hover {
+  background-color: transparent;
+  color: var(--color-primary-hover);
+  transform: none;
+}
+
+/* ============================================
+   Messages
+   ============================================ */
+
+#auth-msg,
+#save-msg {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  min-height: 1.5rem;
+  color: var(--color-text);
+}
+
+#auth-msg:empty,
+#save-msg:empty {
+  display: none;
+}
+
+/* ============================================
+   Lists
+   ============================================ */
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--spacing-md);
+}
+
+ul li {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+ul li:last-child {
+  border-bottom: none;
+}
+
+/* ============================================
+   Row Layout (Two Columns)
+   ============================================ */
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-xl);
+  }
+
+  .row {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  button {
+    width: auto;
+    min-width: 120px;
+  }
+
+  .muted button {
+    width: auto;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .card {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* ============================================
+   Accessibility Improvements
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #000000;
+    --color-text-muted: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
