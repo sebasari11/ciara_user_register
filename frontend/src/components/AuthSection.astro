@@ -61,7 +61,10 @@
       const result = await authService.login(email, password);
       if (result.success) {
         authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
-        showApp(true);
+        // Redirigir a la página de usuarios
+        setTimeout(() => {
+          window.location.href = '/users';
+        }, 500);
       } else {
         authMsg.textContent = result.error || "Login falló";
       }
@@ -78,7 +81,10 @@
       const result = await authService.registerSeed();
       if (result.success) {
         authMsg.textContent = "Usuario creado y logueado como demo@example.com";
-        showApp(true);
+        // Redirigir a la página de usuarios
+        setTimeout(() => {
+          window.location.href = '/users';
+        }, 500);
       } else {
         authMsg.textContent = result.error || "No se pudo registrar";
       }

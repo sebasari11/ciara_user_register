@@ -1,0 +1,608 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="container">
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h1>Crear Nuevo Usuario</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <a href="/users" class="btn-secondary" style="text-decoration: none;">
+            ← Volver a Lista
+          </a>
+          <button type="button" id="logout-btn" class="btn-secondary">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <form id="create-user-form" aria-label="Formulario de creación de usuario">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="email">
+              Email <span class="required">*</span>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                required 
+                autocomplete="email"
+                aria-required="true"
+                aria-describedby="email-error email-hint"
+                placeholder="usuario@ejemplo.com"
+              />
+              <span id="email-hint" class="field-hint"></span>
+              <span id="email-error" class="field-error" role="alert" aria-live="polite"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="cedula">
+              Cédula <span class="required">*</span>
+              <input 
+                type="text" 
+                id="cedula" 
+                name="cedula"
+                required 
+                aria-required="true"
+                pattern="[0-9]+"
+                title="Solo números"
+                placeholder="1234567890"
+              />
+              <span id="cedula-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="edad">
+              Edad <span class="required">*</span>
+              <input 
+                type="number" 
+                id="edad" 
+                name="edad"
+                required 
+                min="1"
+                max="120"
+                aria-required="true"
+                placeholder="25"
+              />
+              <span id="edad-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="genero">
+              Género <span class="required">*</span>
+              <select 
+                id="genero" 
+                name="genero"
+                required 
+                aria-required="true"
+              >
+                <option value="">Seleccione...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+                <option value="prefiero-no-decir">Prefiero no decir</option>
+              </select>
+              <span id="genero-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="so">
+              Sistema Operativo <span class="required">*</span>
+              <select 
+                id="so" 
+                name="so"
+                required 
+                aria-required="true"
+              >
+                <option value="">Seleccione...</option>
+                <option value="windows">Windows</option>
+                <option value="macos">macOS</option>
+                <option value="linux">Linux</option>
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+                <option value="otro">Otro</option>
+              </select>
+              <span id="so-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="movilidad">
+              Movilidad <span class="required">*</span>
+              <input 
+                type="text" 
+                id="movilidad" 
+                name="movilidad"
+                required 
+                aria-required="true"
+                placeholder="Ej: Transporte público"
+              />
+              <span id="movilidad-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="tiempoDiario">
+              Tiempo diario <span class="required">*</span>
+              <input 
+                type="text" 
+                id="tiempoDiario" 
+                name="tiempoDiario"
+                required 
+                placeholder="Ej: 4 horas"
+                aria-required="true"
+              />
+              <span id="tiempoDiario-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="universidad">
+              Universidad <span class="required">*</span>
+              <input 
+                type="text" 
+                id="universidad" 
+                name="universidad"
+                required 
+                aria-required="true"
+                placeholder="Nombre de la universidad"
+              />
+              <span id="universidad-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="carrera">
+              Carrera <span class="required">*</span>
+              <input 
+                type="text" 
+                id="carrera" 
+                name="carrera"
+                required 
+                aria-required="true"
+                placeholder="Nombre de la carrera"
+              />
+              <span id="carrera-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">
+              Teléfono <span class="required">*</span>
+              <input 
+                type="tel" 
+                id="telefono" 
+                name="telefono"
+                required 
+                autocomplete="tel"
+                aria-required="true"
+                placeholder="0987654321"
+              />
+              <span id="telefono-error" class="field-error" role="alert"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="submit-btn" class="btn-primary">
+            Guardar Usuario
+          </button>
+          <a href="/users" class="btn-secondary" style="text-decoration: none; display: inline-block; text-align: center;">
+            Cancelar
+          </a>
+        </div>
+
+        <div id="form-message" role="status" aria-live="polite" aria-atomic="true" class="form-message"></div>
+      </form>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { userRegisterService } from '../../lib/recordsService';
+  import { authService } from '../../lib/authService';
+
+  // Verificar autenticación
+  if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
+    window.location.href = '/';
+  }
+
+  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+  logoutBtn?.addEventListener('click', () => {
+    authService.logout();
+    window.location.href = '/';
+  });
+
+  const form = document.getElementById('create-user-form') as HTMLFormElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement;
+  const emailError = document.getElementById('email-error') as HTMLSpanElement;
+  const emailHint = document.getElementById('email-hint') as HTMLSpanElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const formMessage = document.getElementById('form-message') as HTMLDivElement;
+
+  let emailValidationTimeout: number | null = null;
+  let isEmailValid = false;
+
+  function showFieldError(fieldId: string, message: string) {
+    const errorElement = document.getElementById(`${fieldId}-error`) as HTMLSpanElement;
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      const input = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement;
+      if (input) {
+        input.setAttribute('aria-invalid', 'true');
+        input.classList.add('error');
+      }
+    }
+  }
+
+  function clearFieldError(fieldId: string) {
+    const errorElement = document.getElementById(`${fieldId}-error`) as HTMLSpanElement;
+    if (errorElement) {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+      const input = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement;
+      if (input) {
+        input.removeAttribute('aria-invalid');
+        input.classList.remove('error');
+      }
+    }
+  }
+
+  function showFormMessage(message: string, type: 'success' | 'error' = 'error') {
+    formMessage.textContent = message;
+    formMessage.className = `form-message ${type}`;
+    formMessage.style.display = 'block';
+    
+    if (type === 'success') {
+      setTimeout(() => {
+        window.location.href = '/users';
+      }, 1500);
+    }
+  }
+
+  function clearFormMessage() {
+    formMessage.textContent = '';
+    formMessage.style.display = 'none';
+    formMessage.className = 'form-message';
+  }
+
+  async function validateEmail(email: string): Promise<boolean> {
+    if (!email || email.length < 3) {
+      emailHint.textContent = '';
+      emailHint.className = 'field-hint';
+      clearFieldError('email');
+      isEmailValid = false;
+      return false;
+    }
+
+    // Validación básica de formato
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      emailHint.textContent = 'Formato de email inválido';
+      emailHint.className = 'field-hint error';
+      clearFieldError('email');
+      isEmailValid = false;
+      return false;
+    }
+
+    emailHint.textContent = 'Verificando...';
+    emailHint.className = 'field-hint checking';
+
+    try {
+      const result = await userRegisterService.checkEmailExists(email);
+      
+      if (result.success) {
+        if (result.exists) {
+          emailHint.textContent = '';
+          emailHint.className = 'field-hint';
+          showFieldError('email', 'Este correo electrónico ya está registrado');
+          isEmailValid = false;
+          return false;
+        } else {
+          emailHint.textContent = '✓ Email disponible';
+          emailHint.className = 'field-hint success';
+          clearFieldError('email');
+          isEmailValid = true;
+          return true;
+        }
+      } else {
+        emailHint.textContent = '';
+        emailHint.className = 'field-hint';
+        showFieldError('email', result.error || 'Error al verificar email');
+        isEmailValid = false;
+        return false;
+      }
+    } catch (error) {
+      emailHint.textContent = '';
+      emailHint.className = 'field-hint';
+      showFieldError('email', 'Error de conexión al verificar email');
+      isEmailValid = false;
+      return false;
+    }
+  }
+
+  // Validación en tiempo real del email
+  emailInput?.addEventListener('input', (e) => {
+    const email = (e.target as HTMLInputElement).value.trim();
+    
+    if (emailValidationTimeout) {
+      clearTimeout(emailValidationTimeout);
+    }
+
+    clearFieldError('email');
+    emailHint.textContent = '';
+    emailHint.className = 'field-hint';
+
+    if (email.length >= 3) {
+      emailValidationTimeout = window.setTimeout(() => {
+        validateEmail(email);
+      }, 500);
+    } else {
+      isEmailValid = false;
+    }
+  });
+
+  // Validación de campos requeridos
+  function validateForm(): boolean {
+    let isValid = true;
+    const requiredFields = [
+      'email', 'cedula', 'edad', 'genero', 'so', 
+      'movilidad', 'tiempoDiario', 'universidad', 'carrera', 'telefono'
+    ];
+
+    requiredFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement;
+      if (!field || !field.value.trim()) {
+        showFieldError(fieldId, 'Este campo es requerido');
+        isValid = false;
+      } else {
+        clearFieldError(fieldId);
+      }
+    });
+
+    // Validación específica de email
+    if (emailInput.value.trim() && !isEmailValid) {
+      showFieldError('email', 'Por favor, verifica que el email no esté registrado');
+      isValid = false;
+    }
+
+    // Validación de edad
+    const edadInput = document.getElementById('edad') as HTMLInputElement;
+    if (edadInput) {
+      const edad = parseInt(edadInput.value);
+      if (isNaN(edad) || edad < 1 || edad > 120) {
+        showFieldError('edad', 'La edad debe estar entre 1 y 120 años');
+        isValid = false;
+      }
+    }
+
+    // Validación de cédula (solo números)
+    const cedulaInput = document.getElementById('cedula') as HTMLInputElement;
+    if (cedulaInput && cedulaInput.value && !/^\d+$/.test(cedulaInput.value)) {
+      showFieldError('cedula', 'La cédula debe contener solo números');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearFormMessage();
+
+    // Limpiar errores previos
+    ['email', 'cedula', 'edad', 'genero', 'so', 'movilidad', 'tiempoDiario', 'universidad', 'carrera', 'telefono'].forEach(clearFieldError);
+
+    if (!validateForm()) {
+      showFormMessage('Por favor, corrige los errores en el formulario', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+
+    const formData = new FormData(form);
+    const registerData = {
+      email: (formData.get('email') as string).trim(),
+      cedula: (formData.get('cedula') as string).trim(),
+      edad: Number(formData.get('edad')),
+      genero: formData.get('genero') as string,
+      so: formData.get('so') as string,
+      movilidad: (formData.get('movilidad') as string).trim(),
+      tiempoDiario: (formData.get('tiempoDiario') as string).trim(),
+      universidad: (formData.get('universidad') as string).trim(),
+      carrera: (formData.get('carrera') as string).trim(),
+      telefono: (formData.get('telefono') as string).trim()
+    };
+
+    try {
+      const result = await userRegisterService.saveUserRegister(registerData);
+      
+      if (result.success) {
+        showFormMessage('✓ Usuario creado exitosamente. Redirigiendo...', 'success');
+        form.reset();
+      } else {
+        showFormMessage(result.error || 'Error al guardar el usuario', 'error');
+        
+        // Si el error es de email duplicado, mostrar en el campo
+        if (result.error?.includes('correo') || result.error?.includes('email')) {
+          showFieldError('email', result.error);
+        }
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar Usuario';
+      }
+    } catch (error) {
+      showFormMessage('Error de conexión. Intenta nuevamente.', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Guardar Usuario';
+      console.error('Save user register error:', error);
+    }
+  });
+
+  // Limpiar errores al escribir en los campos
+  const formFields = form?.querySelectorAll('input, select');
+  formFields?.forEach(field => {
+    field.addEventListener('input', () => {
+      const fieldId = field.getAttribute('id');
+      if (fieldId && fieldId !== 'email') {
+        clearFieldError(fieldId);
+      }
+    });
+    
+    field.addEventListener('change', () => {
+      const fieldId = field.getAttribute('id');
+      if (fieldId) {
+        clearFieldError(fieldId);
+      }
+    });
+  });
+</script>
+
+<style>
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    margin-bottom: 0.5rem;
+  }
+
+  .required {
+    color: var(--color-error);
+    font-weight: 600;
+  }
+
+  .field-error {
+    display: none;
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .field-hint {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    min-height: 1.25rem;
+  }
+
+  .field-hint.checking {
+    color: var(--color-text-muted);
+  }
+
+  .field-hint.success {
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  .field-hint.error {
+    color: var(--color-error);
+  }
+
+  input.error,
+  select.error {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+
+  input[aria-invalid="true"],
+  select[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .form-actions .btn-primary {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .form-actions .btn-secondary {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .form-message {
+    display: none;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+
+  .form-message.success {
+    background-color: rgba(34, 197, 94, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+  }
+
+  .form-message.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg);
+    border-color: var(--color-border-hover);
+  }
+</style>
+

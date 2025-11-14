@@ -1,0 +1,500 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="container">
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h1>Gestión de Usuarios</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <a href="/users/create" class="btn-primary" style="text-decoration: none;">
+            ➕ Agregar Usuario
+          </a>
+          <button type="button" id="logout-btn" class="btn-secondary">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="search-container">
+        <label for="search-input" class="sr-only">Buscar usuarios</label>
+        <input 
+          type="search" 
+          id="search-input" 
+          placeholder="Buscar por email, cédula, universidad o carrera..."
+          aria-label="Buscar usuarios"
+        />
+        <button type="button" id="clear-search" class="btn-secondary" style="display: none;">
+          Limpiar
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table id="users-table" role="table" aria-label="Tabla de usuarios registrados">
+          <thead>
+            <tr>
+              <th>
+                <button type="button" class="sort-btn" data-sort="email">
+                  Email <span class="sort-indicator"></span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort="cedula">
+                  Cédula <span class="sort-indicator"></span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort="edad">
+                  Edad <span class="sort-indicator"></span>
+                </button>
+              </th>
+              <th>Género</th>
+              <th>
+                <button type="button" class="sort-btn" data-sort="universidad">
+                  Universidad <span class="sort-indicator"></span>
+                </button>
+              </th>
+              <th>Carrera</th>
+              <th>SO</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 2rem;">
+                Cargando usuarios...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span id="pagination-text">Mostrando 0 de 0 usuarios</span>
+        </div>
+        <div class="pagination-controls">
+          <button type="button" id="prev-page" class="btn-secondary" disabled>
+            ← Anterior
+          </button>
+          <span id="page-info" class="page-info">Página 1 de 1</span>
+          <button type="button" id="next-page" class="btn-secondary" disabled>
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="error-message" role="alert" aria-live="polite" class="error-message" style="display: none;"></div>
+  </main>
+</Layout>
+
+<script>
+  import { userRegisterService, type UserRegister } from '../../lib/recordsService';
+  import { authService } from '../../lib/authService';
+
+  // Verificar autenticación
+  if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
+    window.location.href = '/';
+  }
+
+  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+  logoutBtn?.addEventListener('click', () => {
+    authService.logout();
+    window.location.href = '/';
+  });
+
+  interface PaginationState {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  }
+
+  let currentState = {
+    page: 1,
+    limit: 10,
+    search: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc' as 'asc' | 'desc',
+    pagination: {
+      page: 1,
+      limit: 10,
+      total: 0,
+      totalPages: 1
+    } as PaginationState
+  };
+
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const clearSearchBtn = document.getElementById('clear-search') as HTMLButtonElement;
+  const usersTbody = document.getElementById('users-tbody') as HTMLTableSectionElement;
+  const prevPageBtn = document.getElementById('prev-page') as HTMLButtonElement;
+  const nextPageBtn = document.getElementById('next-page') as HTMLButtonElement;
+  const pageInfo = document.getElementById('page-info') as HTMLSpanElement;
+  const paginationText = document.getElementById('pagination-text') as HTMLSpanElement;
+  const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+  const sortButtons = document.querySelectorAll('.sort-btn') as NodeListOf<HTMLButtonElement>;
+
+  let searchTimeout: number | null = null;
+
+  function showError(message: string) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 5000);
+  }
+
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function renderUsers(users: UserRegister[]) {
+    if (users.length === 0) {
+      usersTbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 2rem;">
+            No se encontraron usuarios
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    usersTbody.innerHTML = users.map(user => `
+      <tr>
+        <td>${user.email}</td>
+        <td>${user.cedula}</td>
+        <td>${user.edad}</td>
+        <td>${user.genero}</td>
+        <td>${user.universidad}</td>
+        <td>${user.carrera}</td>
+        <td>${user.so}</td>
+      </tr>
+    `).join('');
+  }
+
+  function updatePagination(pagination: PaginationState) {
+    currentState.pagination = pagination;
+    
+    const start = (pagination.page - 1) * pagination.limit + 1;
+    const end = Math.min(pagination.page * pagination.limit, pagination.total);
+    
+    paginationText.textContent = `Mostrando ${start}-${end} de ${pagination.total} usuarios`;
+    pageInfo.textContent = `Página ${pagination.page} de ${pagination.totalPages}`;
+    
+    prevPageBtn.disabled = pagination.page <= 1;
+    nextPageBtn.disabled = pagination.page >= pagination.totalPages;
+  }
+
+  function updateSortIndicators() {
+    sortButtons.forEach(btn => {
+      const indicator = btn.querySelector('.sort-indicator') as HTMLSpanElement;
+      const sortBy = btn.getAttribute('data-sort');
+      
+      if (sortBy === currentState.sortBy) {
+        indicator.textContent = currentState.sortOrder === 'asc' ? ' ↑' : ' ↓';
+      } else {
+        indicator.textContent = '';
+      }
+    });
+  }
+
+  async function loadUsers() {
+    usersTbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2rem;">
+          Cargando usuarios...
+        </td>
+      </tr>
+    `;
+
+    try {
+      const result = await userRegisterService.loadUserRegisters({
+        page: currentState.page,
+        limit: currentState.limit,
+        search: currentState.search,
+        sortBy: currentState.sortBy,
+        sortOrder: currentState.sortOrder
+      });
+
+      if (result.success && result.registers && result.pagination) {
+        renderUsers(result.registers);
+        updatePagination(result.pagination);
+      } else {
+        showError(result.error || 'Error al cargar usuarios');
+        usersTbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--color-error);">
+              ${result.error || 'Error al cargar usuarios'}
+            </td>
+          </tr>
+        `;
+      }
+    } catch (error) {
+      showError('Error de conexión');
+      console.error('Load users error:', error);
+    }
+  }
+
+  // Event listeners
+  searchInput?.addEventListener('input', (e) => {
+    const value = (e.target as HTMLInputElement).value.trim();
+    
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    searchTimeout = window.setTimeout(() => {
+      currentState.search = value;
+      currentState.page = 1;
+      clearSearchBtn.style.display = value ? 'block' : 'none';
+      loadUsers();
+    }, 500);
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    searchInput.value = '';
+    currentState.search = '';
+    currentState.page = 1;
+    clearSearchBtn.style.display = 'none';
+    loadUsers();
+  });
+
+  prevPageBtn?.addEventListener('click', () => {
+    if (currentState.pagination.page > 1) {
+      currentState.page = currentState.pagination.page - 1;
+      loadUsers();
+    }
+  });
+
+  nextPageBtn?.addEventListener('click', () => {
+    if (currentState.pagination.page < currentState.pagination.totalPages) {
+      currentState.page = currentState.pagination.page + 1;
+      loadUsers();
+    }
+  });
+
+  sortButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sortBy = btn.getAttribute('data-sort');
+      if (!sortBy) return;
+
+      if (currentState.sortBy === sortBy) {
+        currentState.sortOrder = currentState.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentState.sortBy = sortBy;
+        currentState.sortOrder = 'asc';
+      }
+
+      updateSortIndicators();
+      loadUsers();
+    });
+  });
+
+  // Initial load
+  updateSortIndicators();
+  loadUsers();
+</script>
+
+<style>
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-bg);
+    border-color: var(--color-border-hover);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .search-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+
+  .search-container input[type="search"] {
+    flex: 1;
+    margin: 0;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-bg);
+  }
+
+  thead {
+    background-color: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .sort-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sort-btn:hover {
+    color: var(--color-primary);
+  }
+
+  .sort-indicator {
+    font-size: 0.8rem;
+    color: var(--color-primary);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.2s ease;
+  }
+
+  tbody tr:hover {
+    background-color: var(--color-bg-secondary);
+  }
+
+  td {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pagination-info {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .page-info {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .error-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-sm);
+    color: var(--color-error);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      width: 100%;
+    }
+
+    .table-container {
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 0.5rem;
+    }
+
+    .pagination-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .pagination-controls {
+      justify-content: center;
+    }
+  }
+</style>
+
