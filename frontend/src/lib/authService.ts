@@ -48,16 +48,12 @@ class AuthService {
     }
   }
 
-  async registerSeed(): Promise<AuthResult> {
+  async register(name: string, email: string, password: string): Promise<AuthResult> {
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Usuario Demo",
-          email: "demo@example.com",
-          password: "demo1234"
-        })
+        body: JSON.stringify({ name, email, password })
       });
       const data = await res.json();
       

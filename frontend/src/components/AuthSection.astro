@@ -5,23 +5,46 @@
 <section id="auth-section" aria-labelledby="auth-heading">
   <h2 id="auth-heading">Autenticación</h2>
   <div class="card">
-    <form id="login-form" aria-label="Formulario de inicio de sesión">
-      <label for="email">
+    <!-- Toggle entre Login y Registro -->
+    <div class="auth-tabs">
+      <button 
+        type="button" 
+        id="login-tab" 
+        class="auth-tab active" 
+        aria-selected="true"
+        aria-controls="login-form"
+      >
+        Iniciar Sesión
+      </button>
+      <button 
+        type="button" 
+        id="register-tab" 
+        class="auth-tab" 
+        aria-selected="false"
+        aria-controls="register-form"
+      >
+        Registrarse
+      </button>
+    </div>
+
+    <!-- Formulario de Login -->
+    <form id="login-form" class="auth-form active" aria-label="Formulario de inicio de sesión">
+      <label for="login-email">
         Email
         <input 
           type="email" 
-          id="email" 
+          id="login-email" 
           name="email"
           required 
           autocomplete="email"
           aria-required="true"
         />
       </label>
-      <label for="password">
+      <label for="login-password">
         Contraseña
         <input 
           type="password" 
-          id="password" 
+          id="login-password" 
           name="password"
           required 
           autocomplete="current-password"
@@ -30,71 +53,426 @@
       </label>
       <button type="submit">Iniciar sesión</button>
     </form>
-    <p class="muted">
-      ¿No tienes cuenta?
-      <button id="seed-btn" type="button" aria-label="Crear usuario de prueba">
-        Crear usuario
-      </button>
-    </p>
+
+    <!-- Formulario de Registro -->
+    <form id="register-form" class="auth-form" aria-label="Formulario de registro" style="display: none;">
+      <label for="register-name">
+        Nombre completo
+        <input 
+          type="text" 
+          id="register-name" 
+          name="name"
+          required 
+          autocomplete="name"
+          aria-required="true"
+          minlength="2"
+          maxlength="100"
+        />
+      </label>
+      <label for="register-email">
+        Email
+        <input 
+          type="email" 
+          id="register-email" 
+          name="email"
+          required 
+          autocomplete="email"
+          aria-required="true"
+        />
+        <span id="register-email-error" class="field-error" role="alert"></span>
+      </label>
+      <label for="register-password">
+        Contraseña
+        <input 
+          type="password" 
+          id="register-password" 
+          name="password"
+          required 
+          autocomplete="new-password"
+          aria-required="true"
+          minlength="6"
+        />
+        <span class="field-hint">Mínimo 6 caracteres</span>
+      </label>
+      <label for="register-confirm-password">
+        Confirmar contraseña
+        <input 
+          type="password" 
+          id="register-confirm-password" 
+          name="confirmPassword"
+          required 
+          autocomplete="new-password"
+          aria-required="true"
+        />
+        <span id="register-password-error" class="field-error" role="alert"></span>
+      </label>
+      <button type="submit">Registrarse</button>
+    </form>
+
     <p id="auth-msg" role="status" aria-live="polite" aria-atomic="true"></p>
   </div>
 </section>
 
 <script>
   import { authService } from '../lib/authService';
-  import { showApp } from '../lib/appState';
 
   const authSection = document.getElementById("auth-section");
   const authMsg = document.getElementById("auth-msg");
-  const loginForm = document.getElementById("login-form");
+  const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const registerForm = document.getElementById("register-form") as HTMLFormElement;
+  const loginTab = document.getElementById("login-tab");
+  const registerTab = document.getElementById("register-tab");
   const seedBtn = document.getElementById("seed-btn");
+  const demoSection = document.getElementById("demo-section");
+
+  // Elementos del formulario de registro
+  const registerNameInput = document.getElementById("register-name") as HTMLInputElement;
+  const registerEmailInput = document.getElementById("register-email") as HTMLInputElement;
+  const registerPasswordInput = document.getElementById("register-password") as HTMLInputElement;
+  const registerConfirmPasswordInput = document.getElementById("register-confirm-password") as HTMLInputElement;
+  const registerEmailError = document.getElementById("register-email-error");
+  const registerPasswordError = document.getElementById("register-password-error");
+
+  // Toggle entre formularios
+  function showLoginForm() {
+    loginForm?.classList.add("active");
+    loginForm?.style.setProperty("display", "block");
+    registerForm?.classList.remove("active");
+    registerForm?.style.setProperty("display", "none");
+    loginTab?.classList.add("active");
+    loginTab?.setAttribute("aria-selected", "true");
+    registerTab?.classList.remove("active");
+    registerTab?.setAttribute("aria-selected", "false");
+    if (demoSection) demoSection.style.display = "block";
+    clearMessages();
+  }
+
+  function showRegisterForm() {
+    registerForm?.classList.add("active");
+    registerForm?.style.setProperty("display", "block");
+    loginForm?.classList.remove("active");
+    loginForm?.style.setProperty("display", "none");
+    registerTab?.classList.add("active");
+    registerTab?.setAttribute("aria-selected", "true");
+    loginTab?.classList.remove("active");
+    loginTab?.setAttribute("aria-selected", "false");
+    if (demoSection) demoSection.style.display = "none";
+    clearMessages();
+  }
+
+  function clearMessages() {
+    if (authMsg) authMsg.textContent = "";
+    if (registerEmailError) registerEmailError.textContent = "";
+    if (registerPasswordError) registerPasswordError.textContent = "";
+  }
+
+  function clearFieldErrors() {
+    if (registerEmailError) registerEmailError.textContent = "";
+    if (registerPasswordError) registerPasswordError.textContent = "";
+    registerEmailInput?.classList.remove("error");
+    registerPasswordInput?.classList.remove("error");
+    registerConfirmPasswordInput?.classList.remove("error");
+  }
+
+  // Validación del formulario de registro
+  function validateRegisterForm(): boolean {
+    clearFieldErrors();
+    let isValid = true;
+
+    const name = registerNameInput?.value.trim();
+    const email = registerEmailInput?.value.trim();
+    const password = registerPasswordInput?.value;
+    const confirmPassword = registerConfirmPasswordInput?.value;
+
+    // Validar nombre
+    if (!name || name.length < 2) {
+      isValid = false;
+    }
+
+    // Validar email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (registerEmailError) {
+        registerEmailError.textContent = "Email inválido";
+      }
+      registerEmailInput?.classList.add("error");
+      isValid = false;
+    }
+
+    // Validar contraseña
+    if (!password || password.length < 6) {
+      if (registerPasswordError) {
+        registerPasswordError.textContent = "La contraseña debe tener al menos 6 caracteres";
+      }
+      registerPasswordInput?.classList.add("error");
+      isValid = false;
+    }
+
+    // Validar confirmación de contraseña
+    if (password !== confirmPassword) {
+      if (registerPasswordError) {
+        registerPasswordError.textContent = "Las contraseñas no coinciden";
+      }
+      registerPasswordInput?.classList.add("error");
+      registerConfirmPasswordInput?.classList.add("error");
+      isValid = false;
+    }
+
+    return isValid;
+  }
 
   async function handleLogin(e: Event) {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
-    const email = (form.querySelector('#email') as HTMLInputElement).value.trim();
-    const password = (form.querySelector('#password') as HTMLInputElement).value;
+    const email = (form.querySelector('#login-email') as HTMLInputElement).value.trim();
+    const password = (form.querySelector('#login-password') as HTMLInputElement).value;
 
-    authMsg.textContent = "Autenticando...";
+    if (authMsg) authMsg.textContent = "Autenticando...";
     
     try {
       const result = await authService.login(email, password);
       if (result.success) {
-        authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
+        if (authMsg) authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
         // Redirigir a la página de usuarios
         setTimeout(() => {
           window.location.href = '/users';
         }, 500);
       } else {
-        authMsg.textContent = result.error || "Login falló";
+        if (authMsg) authMsg.textContent = result.error || "Login falló";
       }
     } catch (error) {
-      authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      if (authMsg) authMsg.textContent = "Error de conexión. Intenta nuevamente.";
       console.error("Login error:", error);
     }
   }
 
+  async function handleRegister(e: Event) {
+    e.preventDefault();
+    
+    if (!validateRegisterForm()) {
+      if (authMsg) authMsg.textContent = "Por favor, corrige los errores en el formulario";
+      return;
+    }
+
+    const name = registerNameInput?.value.trim() || "";
+    const email = registerEmailInput?.value.trim() || "";
+    const password = registerPasswordInput?.value;
+
+    if (authMsg) authMsg.textContent = "Registrando usuario...";
+    
+    try {
+      const result = await authService.register(name, email, password);
+      if (result.success) {
+        if (authMsg) authMsg.textContent = `¡Bienvenido, ${result.user?.name || name}! Registro exitoso.`;
+        // Redirigir a la página de usuarios
+        setTimeout(() => {
+          window.location.href = '/users';
+        }, 1000);
+      } else {
+        if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
+      }
+    } catch (error) {
+      if (authMsg) authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      console.error("Register error:", error);
+    }
+  }
+
   async function handleRegisterSeed() {
-    authMsg.textContent = "Registrando usuario...";
+    if (authMsg) authMsg.textContent = "Registrando usuario demo...";
     
     try {
       const result = await authService.registerSeed();
       if (result.success) {
-        authMsg.textContent = "Usuario creado y logueado como demo@example.com";
+        if (authMsg) authMsg.textContent = "Usuario demo creado y logueado como demo@example.com";
         // Redirigir a la página de usuarios
         setTimeout(() => {
           window.location.href = '/users';
         }, 500);
       } else {
-        authMsg.textContent = result.error || "No se pudo registrar";
+        if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
       }
     } catch (error) {
-      authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      if (authMsg) authMsg.textContent = "Error de conexión. Intenta nuevamente.";
       console.error("Register error:", error);
     }
   }
 
+  // Event listeners
   loginForm?.addEventListener("submit", handleLogin);
+  registerForm?.addEventListener("submit", handleRegister);
+  loginTab?.addEventListener("click", showLoginForm);
+  registerTab?.addEventListener("click", showRegisterForm);
   seedBtn?.addEventListener("click", handleRegisterSeed);
+
+  // Validación en tiempo real para confirmación de contraseña
+  registerConfirmPasswordInput?.addEventListener("input", () => {
+    if (registerPasswordInput?.value !== registerConfirmPasswordInput?.value) {
+      if (registerPasswordError) {
+        registerPasswordError.textContent = "Las contraseñas no coinciden";
+      }
+      registerConfirmPasswordInput.classList.add("error");
+    } else {
+      if (registerPasswordError) {
+        registerPasswordError.textContent = "";
+      }
+      registerConfirmPasswordInput.classList.remove("error");
+      registerPasswordInput?.classList.remove("error");
+    }
+  });
 </script>
 
+<style>
+  .auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+  }
+
+  .auth-tab:hover {
+    color: var(--color-primary);
+    background-color: rgba(0, 102, 204, 0.05);
+  }
+
+  .auth-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .auth-form {
+    display: none;
+  }
+
+  .auth-form.active {
+    display: block;
+  }
+
+  .auth-form label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .auth-form input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .auth-form input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  }
+
+  .auth-form input.error {
+    border-color: var(--color-error, #ef4444);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+
+  .field-error {
+    display: block;
+    color: var(--color-error, #ef4444);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .field-hint {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .auth-form button[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .auth-form button[type="submit"]:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+
+  .auth-form button[type="submit"]:active {
+    transform: translateY(0);
+  }
+
+  .demo-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .demo-section .muted {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .demo-section button {
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: inherit;
+    padding: 0;
+    margin-left: 0.25rem;
+  }
+
+  .demo-section button:hover {
+    color: var(--color-primary-hover);
+  }
+
+  #auth-msg {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  #auth-msg:not(:empty) {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+  }
+
+  @media (max-width: 768px) {
+    .auth-tabs {
+      gap: 0;
+    }
+
+    .auth-tab {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+</style>
