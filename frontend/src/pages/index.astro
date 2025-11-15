@@ -15,7 +15,8 @@ import AuthSection from '../components/AuthSection.astro';
   if (typeof window !== 'undefined') {
     const isAuthed = authService.isAuthenticated();
     if (isAuthed) {
-      window.location.href = '/ciara/users';
+      // Usar replace() para no agregar entrada al historial
+      window.location.replace('/ciara/users');
     }
   }
 </script>

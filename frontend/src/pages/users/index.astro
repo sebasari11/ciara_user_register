@@ -97,13 +97,15 @@ import Layout from '../../layouts/Layout.astro';
 
   // Verificar autenticación
   if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
-    window.location.href = '/';
+    // Usar replace() para no agregar entrada al historial
+    window.location.replace('/ciara/');
   }
 
   const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
   logoutBtn?.addEventListener('click', () => {
     authService.logout();
-    window.location.href = '/ciara/';
+    // Usar replace() para no agregar entrada al historial
+    window.location.replace('/ciara/');
   });
 
   interface PaginationState {

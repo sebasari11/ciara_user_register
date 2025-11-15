@@ -232,9 +232,9 @@
       const result = await authService.login(email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
-        // Redirigir a la página de usuarios
+        // Redirigir a la página de usuarios (usar replace para no agregar al historial)
         setTimeout(() => {
-          window.location.href = '/ciara/users';
+          window.location.replace('/ciara/users');
         }, 500);
       } else {
         if (authMsg) authMsg.textContent = result.error || "Login falló";
@@ -263,9 +263,9 @@
       const result = await authService.register(name, email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `¡Bienvenido, ${result.user?.name || name}! Registro exitoso.`;
-        // Redirigir a la página de usuarios
+        // Redirigir a la página de usuarios (usar replace para no agregar al historial)
         setTimeout(() => {
-          window.location.href = '/ciara/users';
+          window.location.replace('/ciara/users');
         }, 1000);
       } else {
         if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
@@ -276,32 +276,33 @@
     }
   }
 
-  async function handleRegisterSeed() {
-    if (authMsg) authMsg.textContent = "Registrando usuario demo...";
-    
-    try {
-      const result = await authService.registerSeed();
-      if (result.success) {
-        if (authMsg) authMsg.textContent = "Usuario demo creado y logueado como demo@example.com";
-        // Redirigir a la página de usuarios
-        setTimeout(() => {
-          window.location.href = '/ciara/users';
-        }, 500);
-      } else {
-        if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
-      }
-    } catch (error) {
-      if (authMsg) authMsg.textContent = "Error de conexión. Intenta nuevamente.";
-      console.error("Register error:", error);
-    }
-  }
+  // Función deshabilitada: registerSeed no está implementado en authService
+  // async function handleRegisterSeed() {
+  //   if (authMsg) authMsg.textContent = "Registrando usuario demo...";
+  //   
+  //   try {
+  //     const result = await authService.registerSeed();
+  //     if (result.success) {
+  //       if (authMsg) authMsg.textContent = "Usuario demo creado y logueado como demo@example.com";
+  //       // Redirigir a la página de usuarios (usar replace para no agregar al historial)
+  //       setTimeout(() => {
+  //         window.location.replace('/ciara/users');
+  //       }, 500);
+  //     } else {
+  //       if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
+  //     }
+  //   } catch (error) {
+  //     if (authMsg) authMsg.textContent = "Error de conexión. Intenta nuevamente.";
+  //     console.error("Register error:", error);
+  //   }
+  // }
 
   // Event listeners
   loginForm?.addEventListener("submit", handleLogin);
   registerForm?.addEventListener("submit", handleRegister);
   loginTab?.addEventListener("click", showLoginForm);
   registerTab?.addEventListener("click", showRegisterForm);
-  seedBtn?.addEventListener("click", handleRegisterSeed);
+  // seedBtn?.addEventListener("click", handleRegisterSeed); // Deshabilitado: función no implementada
 
   // Validación en tiempo real para confirmación de contraseña
   registerConfirmPasswordInput?.addEventListener("input", () => {
