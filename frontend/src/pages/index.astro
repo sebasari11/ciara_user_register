@@ -10,13 +10,13 @@ import AuthSection from '../components/AuthSection.astro';
 <script>
   // Initialize app state on page load
   import { authService } from '../lib/authService';
+  import { redirectTo } from '../lib/navigation';
 
   // Check authentication status and redirect if authenticated
   if (typeof window !== 'undefined') {
     const isAuthed = authService.isAuthenticated();
     if (isAuthed) {
-      // Usar replace() para no agregar entrada al historial
-      window.location.replace('/ciara/users');
+      redirectTo('/ciara/users');
     }
   }
 </script>

@@ -115,6 +115,7 @@
 
 <script>
   import { authService } from '../lib/authService';
+  import { redirectTo } from '../lib/navigation';
 
   const authSection = document.getElementById("auth-section");
   const authMsg = document.getElementById("auth-msg");
@@ -232,9 +233,9 @@
       const result = await authService.login(email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
-        // Redirigir a la página de usuarios (usar replace para no agregar al historial)
+        // Redirigir a la página de usuarios
         setTimeout(() => {
-          window.location.replace('/ciara/users');
+          redirectTo('/ciara/users');
         }, 500);
       } else {
         if (authMsg) authMsg.textContent = result.error || "Login falló";
@@ -263,9 +264,9 @@
       const result = await authService.register(name, email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `¡Bienvenido, ${result.user?.name || name}! Registro exitoso.`;
-        // Redirigir a la página de usuarios (usar replace para no agregar al historial)
+        // Redirigir a la página de usuarios
         setTimeout(() => {
-          window.location.replace('/ciara/users');
+          redirectTo('/ciara/users');
         }, 1000);
       } else {
         if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";

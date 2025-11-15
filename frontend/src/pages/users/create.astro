@@ -208,18 +208,17 @@ import Layout from '../../layouts/Layout.astro';
 <script>
   import { userRegisterService } from '../../lib/recordsService';
   import { authService } from '../../lib/authService';
+  import { redirectTo } from '../../lib/navigation';
 
   // Verificar autenticación
   if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
-    // Usar replace() para no agregar entrada al historial
-    window.location.replace('/ciara/');
+    redirectTo('/ciara/');
   }
 
   const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
   logoutBtn?.addEventListener('click', () => {
     authService.logout();
-    // Usar replace() para no agregar entrada al historial
-    window.location.replace('/ciara/');
+    redirectTo('/ciara/');
   });
 
   const form = document.getElementById('create-user-form') as HTMLFormElement;
@@ -265,8 +264,7 @@ import Layout from '../../layouts/Layout.astro';
     
     if (type === 'success') {
       setTimeout(() => {
-        // Usar replace() para no agregar entrada al historial después de crear
-        window.location.replace('/ciara/users');
+        redirectTo('/ciara/users');
       }, 1500);
     }
   }
