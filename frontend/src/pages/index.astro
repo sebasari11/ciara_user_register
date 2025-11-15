@@ -15,7 +15,7 @@ import AuthSection from '../components/AuthSection.astro';
   if (typeof window !== 'undefined') {
     const isAuthed = authService.isAuthenticated();
     if (isAuthed) {
-      window.location.href = '/users';
+      window.location.href = '/ciara/users';
     }
   }
 </script>

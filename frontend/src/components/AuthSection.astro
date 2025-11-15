@@ -234,7 +234,7 @@
         if (authMsg) authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
         // Redirigir a la página de usuarios
         setTimeout(() => {
-          window.location.href = '/users';
+          window.location.href = '/ciara/users';
         }, 500);
       } else {
         if (authMsg) authMsg.textContent = result.error || "Login falló";
@@ -265,7 +265,7 @@
         if (authMsg) authMsg.textContent = `¡Bienvenido, ${result.user?.name || name}! Registro exitoso.`;
         // Redirigir a la página de usuarios
         setTimeout(() => {
-          window.location.href = '/users';
+          window.location.href = '/ciara/users';
         }, 1000);
       } else {
         if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";
@@ -285,7 +285,7 @@
         if (authMsg) authMsg.textContent = "Usuario demo creado y logueado como demo@example.com";
         // Redirigir a la página de usuarios
         setTimeout(() => {
-          window.location.href = '/users';
+          window.location.href = '/ciara/users';
         }, 500);
       } else {
         if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";

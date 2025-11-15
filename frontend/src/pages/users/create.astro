@@ -8,7 +8,7 @@ import Layout from '../../layouts/Layout.astro';
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
         <h1>Crear Nuevo Usuario</h1>
         <div style="display: flex; gap: 1rem; align-items: center;">
-          <a href="/users" class="btn-secondary" style="text-decoration: none;">
+          <a href="/ciara/users" class="btn-secondary" style="text-decoration: none;">
             ← Volver a Lista
           </a>
           <button type="button" id="logout-btn" class="btn-secondary">
@@ -194,7 +194,7 @@ import Layout from '../../layouts/Layout.astro';
           <button type="submit" id="submit-btn" class="btn-primary">
             Guardar Usuario
           </button>
-          <a href="/users" class="btn-secondary" style="text-decoration: none; display: inline-block; text-align: center;">
+          <a href="/ciara/users" class="btn-secondary" style="text-decoration: none; display: inline-block; text-align: center;">
             Cancelar
           </a>
         </div>
@@ -217,7 +217,7 @@ import Layout from '../../layouts/Layout.astro';
   const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
   logoutBtn?.addEventListener('click', () => {
     authService.logout();
-    window.location.href = '/';
+    window.location.href = '/ciara/';
   });
 
   const form = document.getElementById('create-user-form') as HTMLFormElement;
@@ -263,7 +263,7 @@ import Layout from '../../layouts/Layout.astro';
     
     if (type === 'success') {
       setTimeout(() => {
-        window.location.href = '/users';
+        window.location.href = '/ciara/users';
       }, 1500);
     }
   }
