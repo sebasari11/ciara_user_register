@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRegisterRoutes from "./routes/user-register.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
 
 dotenv.config();
 const app = express();
@@ -20,14 +21,12 @@ app.use(
   })
 );
 
-// Conexión a Mongo
 await connectDB();
 
-// Rutas
 app.get("/api/health", (req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use("/api/auth", authRoutes);
 app.use("/api/user-register", userRegisterRoutes);
+app.use("/api/reportes", reportesRoutes);
 
-// Arranque
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`API escuchando en puerto ${PORT}`));
