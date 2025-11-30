@@ -46,7 +46,7 @@ const options = {
   apis: ["./src/routes/*.routes.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
-app.use("/api/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/ciara/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 await connectDB();
 
@@ -58,6 +58,6 @@ app.use("/api/reportes", reportesRoutes);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`API escuchando en puerto ${PORT}`);
-  console.log(`API docs: http://localhost:${PORT}/api-docs`);
+  console.log(`API docs: http://localhost:${PORT}/ciara/api-docs`);
 });
 
