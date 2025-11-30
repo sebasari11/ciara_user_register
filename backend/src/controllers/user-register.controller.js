@@ -60,10 +60,8 @@ export const listUserRegisters = async (req, res) => {
       }
       : {};
 
-    // Obtener total de registros
     const total = await UserRegister.countDocuments(searchQuery);
 
-    // Obtener registros paginados
     const items = await UserRegister.find(searchQuery)
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
@@ -80,7 +78,7 @@ export const listUserRegisters = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "No se pudo listar" });
+    res.status(500).json({ error: "No se pudo listar los registros" });
   }
 };
 

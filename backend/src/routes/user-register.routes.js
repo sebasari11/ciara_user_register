@@ -4,7 +4,6 @@ import { authRequired } from "../middleware/auth.js";
 
 const router = Router();
 
-// Todas las rutas requieren autenticación
 router.post("/", authRequired, createUserRegister);
 router.get("/", authRequired, listUserRegisters);
 router.get("/check-email", authRequired, checkEmailExists);
