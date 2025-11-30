@@ -46,7 +46,7 @@ const options = {
   apis: ["./src/routes/*.routes.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 await connectDB();
 
