@@ -1,0 +1,528 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SearchBar from '../../components/SearchBar.astro';
+import ReportesTable from '../../components/ReportesTable.astro';
+---
+
+<Layout title="Reportes - CIARA">
+  <main class="container reportes-container">
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h1>Reportes de Uso</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button type="button" id="back-btn" class="btn-secondary">
+            ← Volver al Menú
+          </button>
+          <button type="button" id="logout-btn" class="btn-secondary">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <SearchBar placeholder="Buscar por email, fecha, mayor consumo o paquetes..." />
+
+      <div id="loading-message" style="text-align: center; padding: 2rem; display: none;">
+        Cargando reportes...
+      </div>
+
+      <div id="table-wrapper">
+        <!-- Table will be rendered here by client-side script -->
+      </div>
+
+      <div id="error-message" role="alert" aria-live="polite" class="error-message" style="display: none;"></div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { reportesService, type Reporte } from '../../lib/reportesService';
+  import { authService } from '../../lib/authService';
+  import { redirectTo } from '../../lib/navigation';
+
+  // Check authentication
+  if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
+    redirectTo('/ciara/');
+  }
+
+  const backBtn = document.getElementById('back-btn') as HTMLButtonElement;
+  backBtn?.addEventListener('click', () => {
+    redirectTo('/ciara/menu');
+  });
+
+  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+  logoutBtn?.addEventListener('click', () => {
+    authService.logout();
+    redirectTo('/ciara/');
+  });
+
+  interface State {
+    search: string;
+    sortBy: string;
+    sortOrder: 'asc' | 'desc';
+  }
+
+  let currentState: State = {
+    search: '',
+    sortBy: 'fecha',
+    sortOrder: 'desc'
+  };
+
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const clearSearchBtn = document.getElementById('clear-search') as HTMLButtonElement;
+  const tableWrapper = document.getElementById('table-wrapper') as HTMLDivElement;
+  const loadingMessage = document.getElementById('loading-message') as HTMLDivElement;
+  const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+
+  let searchTimeout: number | null = null;
+
+  function showError(message: string) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 5000);
+  }
+
+  function formatDate(date: string | Date): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  function formatTime(minutes: number): string {
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+  }
+
+  function getSortIndicator(field: string): string {
+    if (currentState.sortBy === field) {
+      return currentState.sortOrder === 'asc' ? ' ↑' : ' ↓';
+    }
+    return '';
+  }
+
+  function renderTable(reportes: Reporte[]) {
+    if (reportes.length === 0) {
+      tableWrapper.innerHTML = `
+        <div class="table-container">
+          <table role="table" aria-label="Tabla de reportes">
+            <thead>
+              <tr>
+                <th>
+                  <button type="button" class="sort-btn" data-sort="email">
+                    Email <span class="sort-indicator">${getSortIndicator('email')}</span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="sort-btn" data-sort="fecha">
+                    Fecha <span class="sort-indicator">${getSortIndicator('fecha')}</span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="sort-btn" data-sort="mayorConsumo">
+                    Mayor Consumo <span class="sort-indicator">${getSortIndicator('mayorConsumo')}</span>
+                  </button>
+                </th>
+                <th>Paquete 1</th>
+                <th>Tiempo 1</th>
+                <th>Paquete 2</th>
+                <th>Tiempo 2</th>
+                <th>Paquete 3</th>
+                <th>Tiempo 3</th>
+                <th>Paquete 4</th>
+                <th>Tiempo 4</th>
+                <th>Paquete 5</th>
+                <th>Tiempo 5</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="13" style="text-align: center; padding: 2rem;">
+                  No se encontraron reportes
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+      attachSortListeners();
+      return;
+    }
+
+    tableWrapper.innerHTML = `
+      <div class="table-container">
+        <table id="reportes-table" role="table" aria-label="Tabla de reportes">
+          <thead>
+            <tr>
+              <th>
+                <button type="button" class="sort-btn" data-sort="email">
+                  Email <span class="sort-indicator">${getSortIndicator('email')}</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort="fecha">
+                  Fecha <span class="sort-indicator">${getSortIndicator('fecha')}</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="sort-btn" data-sort="mayorConsumo">
+                  Mayor Consumo <span class="sort-indicator">${getSortIndicator('mayorConsumo')}</span>
+                </button>
+              </th>
+              <th>Paquete 1</th>
+              <th>Tiempo 1</th>
+              <th>Paquete 2</th>
+              <th>Tiempo 2</th>
+              <th>Paquete 3</th>
+              <th>Tiempo 3</th>
+              <th>Paquete 4</th>
+              <th>Tiempo 4</th>
+              <th>Paquete 5</th>
+              <th>Tiempo 5</th>
+            </tr>
+          </thead>
+          <tbody id="reportes-tbody">
+            ${reportes.map(reporte => `
+              <tr>
+                <td data-label="Email">${reporte.email}</td>
+                <td data-label="Fecha">${formatDate(reporte.fecha)}</td>
+                <td data-label="Mayor Consumo">${reporte.mayorConsumo}</td>
+                <td data-label="Paquete 1">${reporte.packageName1}</td>
+                <td data-label="Tiempo 1">${formatTime(reporte.tiempoUso1)}</td>
+                <td data-label="Paquete 2">${reporte.packageName2}</td>
+                <td data-label="Tiempo 2">${formatTime(reporte.tiempoUso2)}</td>
+                <td data-label="Paquete 3">${reporte.packageName3}</td>
+                <td data-label="Tiempo 3">${formatTime(reporte.tiempoUso3)}</td>
+                <td data-label="Paquete 4">${reporte.packageName4}</td>
+                <td data-label="Tiempo 4">${formatTime(reporte.tiempoUso4)}</td>
+                <td data-label="Paquete 5">${reporte.packageName5}</td>
+                <td data-label="Tiempo 5">${formatTime(reporte.tiempoUso5)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+    attachSortListeners();
+  }
+
+  function attachSortListeners() {
+    const sortButtons = document.querySelectorAll('.sort-btn') as NodeListOf<HTMLButtonElement>;
+    sortButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sortBy = btn.getAttribute('data-sort');
+        if (!sortBy) return;
+
+        if (currentState.sortBy === sortBy) {
+          currentState.sortOrder = currentState.sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentState.sortBy = sortBy;
+          currentState.sortOrder = 'asc';
+        }
+
+        loadReportes();
+      });
+    });
+  }
+
+  async function loadReportes() {
+    loadingMessage.style.display = 'block';
+    tableWrapper.style.display = 'none';
+
+    try {
+      const result = await reportesService.loadReportes({
+        search: currentState.search,
+        sortBy: currentState.sortBy,
+        sortOrder: currentState.sortOrder
+      });
+
+      loadingMessage.style.display = 'none';
+      tableWrapper.style.display = 'block';
+
+      if (result.success && result.reportes) {
+        renderTable(result.reportes);
+      } else {
+        showError(result.error || 'Error al cargar reportes');
+        renderTable([]);
+      }
+    } catch (error) {
+      loadingMessage.style.display = 'none';
+      tableWrapper.style.display = 'block';
+      showError('Error de conexión');
+      console.error('Load reportes error:', error);
+      renderTable([]);
+    }
+  }
+
+  // Event listeners
+  searchInput?.addEventListener('input', (e) => {
+    const value = (e.target as HTMLInputElement).value.trim();
+    
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    searchTimeout = window.setTimeout(() => {
+      currentState.search = value;
+      clearSearchBtn.style.display = value ? 'block' : 'none';
+      loadReportes();
+    }, 500);
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    searchInput.value = '';
+    currentState.search = '';
+    clearSearchBtn.style.display = 'none';
+    loadReportes();
+  });
+
+  // Initial load
+  loadReportes();
+</script>
+
+<style>
+  .reportes-container {
+    max-width: 1600px !important;
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+
+  @media (min-width: 1400px) {
+    .reportes-container {
+      max-width: 1800px !important;
+    }
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-bg);
+    border-color: var(--color-border-hover);
+  }
+
+  .reportes-container .card {
+    padding: var(--spacing-xl);
+  }
+
+  .error-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-sm);
+    color: var(--color-error);
+  }
+
+  .table-container {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    box-shadow: 0 1px 3px rgba(34, 34, 34, 0.05);
+    width: 100%;
+  }
+
+  table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--color-bg);
+  }
+
+  thead {
+    background: linear-gradient(to bottom, 
+      var(--color-bg-secondary) 0%, 
+      rgba(0, 0, 0, 0.02) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  thead tr {
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  th {
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .sort-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .sort-btn:hover {
+    color: var(--color-primary);
+  }
+
+  .sort-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+
+  .sort-indicator {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-left: 0.25rem;
+  }
+
+  tbody {
+    background-color: var(--color-bg);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: all 0.15s ease;
+    background-color: var(--color-bg);
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.015);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+  }
+
+  tbody tr:hover {
+    background-color: rgba(0, 102, 204, 0.08) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    tbody tr:hover {
+      background-color: rgba(74, 158, 255, 0.12) !important;
+    }
+  }
+
+  td {
+    padding: 0.875rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    line-height: 1.6;
+    vertical-align: middle;
+  }
+
+  tbody tr td[colspan] {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  /* Responsive design for mobile */
+  @media (max-width: 768px) {
+    .table-container {
+      border-radius: var(--radius-sm);
+      border-left: none;
+      border-right: none;
+      margin-left: calc(-1 * var(--spacing-lg));
+      margin-right: calc(-1 * var(--spacing-lg));
+      width: calc(100% + 2 * var(--spacing-lg));
+    }
+
+    table {
+      font-size: 0.8125rem;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      background-color: var(--color-bg-secondary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--color-bg-secondary);
+    }
+
+    td {
+      display: block;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      position: relative;
+      padding-left: 40%;
+    }
+
+    td:last-child {
+      border-bottom: none;
+    }
+
+    td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0;
+      width: 35%;
+      padding-right: 1rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    td[colspan] {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-bottom: none;
+    }
+
+    td[colspan]::before {
+      display: none;
+    }
+  }
+</style>
+

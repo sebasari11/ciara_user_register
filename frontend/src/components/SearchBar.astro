@@ -1,0 +1,65 @@
+---
+interface Props {
+  placeholder?: string;
+  value?: string;
+}
+
+const { placeholder = "Buscar reportes..." } = Astro.props;
+---
+
+<div class="search-container">
+  <label for="search-input" class="sr-only">Buscar reportes</label>
+  <input 
+    type="search" 
+    id="search-input" 
+    placeholder={placeholder}
+    aria-label="Buscar reportes"
+    value={Astro.props.value || ''}
+  />
+  <button type="button" id="clear-search" class="btn-secondary" style="display: none;">
+    Limpiar
+  </button>
+</div>
+
+<style>
+  .search-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+
+  .search-container input[type="search"] {
+    flex: 1;
+    margin: 0;
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-bg);
+    border-color: var(--color-border-hover);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
