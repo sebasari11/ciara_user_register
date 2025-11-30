@@ -8,6 +8,9 @@ import Layout from '../../layouts/Layout.astro';
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
         <h1>Gestión de Usuarios</h1>
         <div style="display: flex; gap: 1rem; align-items: center;">
+          <button type="button" id="back-btn" class="btn-secondary">
+            ← Volver al Menú
+          </button>
           <a href="/ciara/users/create" class="btn-primary" style="text-decoration: none;">
             ➕ Agregar Usuario
           </a>
@@ -100,6 +103,11 @@ import Layout from '../../layouts/Layout.astro';
   if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
     redirectTo('/ciara/');
   }
+
+  const backBtn = document.getElementById('back-btn') as HTMLButtonElement;
+  backBtn?.addEventListener('click', () => {
+    redirectTo('/ciara/menu');
+  });
 
   const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
   logoutBtn?.addEventListener('click', () => {

@@ -233,9 +233,9 @@
       const result = await authService.login(email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `Bienvenido, ${result.user?.name || email}`;
-        // Redirigir a la página de usuarios
+        // Redirigir al menú principal
         setTimeout(() => {
-          redirectTo('/ciara/users');
+          redirectTo('/ciara/menu');
         }, 500);
       } else {
         if (authMsg) authMsg.textContent = result.error || "Login falló";
@@ -264,9 +264,9 @@
       const result = await authService.register(name, email, password);
       if (result.success) {
         if (authMsg) authMsg.textContent = `¡Bienvenido, ${result.user?.name || name}! Registro exitoso.`;
-        // Redirigir a la página de usuarios
+        // Redirigir al menú principal
         setTimeout(() => {
-          redirectTo('/ciara/users');
+          redirectTo('/ciara/menu');
         }, 1000);
       } else {
         if (authMsg) authMsg.textContent = result.error || "No se pudo registrar";

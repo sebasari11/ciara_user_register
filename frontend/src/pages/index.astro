@@ -16,7 +16,7 @@ import AuthSection from '../components/AuthSection.astro';
   if (typeof window !== 'undefined') {
     const isAuthed = authService.isAuthenticated();
     if (isAuthed) {
-      redirectTo('/ciara/users');
+      redirectTo('/ciara/menu');
     }
   }
 </script>
