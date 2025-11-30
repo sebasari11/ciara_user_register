@@ -177,19 +177,19 @@
       telefono: (form.querySelector('#telefono') as HTMLInputElement).value.trim()
     };
 
-    saveMsg.textContent = "Guardando...";
+    saveMsg!.textContent = "Guardando...";
     
     try {
       const result = await userRegisterService.saveUserRegister(registerData);
       if (result.success) {
-        saveMsg.textContent = "Registro creado ✔";
+        saveMsg!.textContent = "Registro creado ✔";
         form.reset();
         await loadUserRegisters();
       } else {
-        saveMsg.textContent = result.error || "Error al guardar";
+        saveMsg!.textContent = result.error || "Error al guardar";
       }
     } catch (error) {
-      saveMsg.textContent = "Error de conexión. Intenta nuevamente.";
+      saveMsg!.textContent = "Error de conexión. Intenta nuevamente.";
       console.error("Save user register error:", error);
     }
   }
