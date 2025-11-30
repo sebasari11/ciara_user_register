@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRegisterRoutes from "./routes/user-register.routes.js";
@@ -21,6 +23,31 @@ app.use(
   })
 );
 
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "CIARA API",
+    version: "1.0.0",
+    description: "API para el sistema de gestión de datos de CIARA"
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "Ingrese el token JWT obtenido al iniciar sesión"
+      }
+    }
+  }
+};
+const options = {
+  swaggerDefinition,
+  apis: ["./src/routes/*.routes.js"],
+};
+const swaggerSpec = swaggerJsdoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 await connectDB();
 
 app.get("/api/health", (req, res) => res.json({ ok: true, ts: Date.now() }));
@@ -29,4 +56,8 @@ app.use("/api/user-register", userRegisterRoutes);
 app.use("/api/reportes", reportesRoutes);
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`API escuchando en puerto ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`API escuchando en puerto ${PORT}`);
+  console.log(`API docs: http://localhost:${PORT}/api-docs`);
+});
+
