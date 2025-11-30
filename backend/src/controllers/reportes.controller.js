@@ -14,7 +14,7 @@ export const listReportes = async (req, res) => {
             ? {
                 $or: [
                     { email: { $regex: search, $options: "i" } },
-                    { fecha: { $regex: search, $options: "i" } },
+                    // { fecha: { $regex: search, $options: "i" } },
                     { mayorConsumo: { $regex: search, $options: "i" } },
                     { packageName1: { $regex: search, $options: "i" } },
                     { packageName2: { $regex: search, $options: "i" } },
