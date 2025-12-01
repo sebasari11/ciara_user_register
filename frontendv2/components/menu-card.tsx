@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText, Activity } from "lucide-react"
+import { Users, FileText, Activity, Settings, Sparkles } from "lucide-react"
 
 interface MenuCardProps {
   title: string
@@ -49,6 +49,18 @@ export function MenuCards() {
         description="Consultas y respuestas de Gemini"
         href="/actividades-alternativas"
         icon={<Activity className="h-6 w-6" />}
+      />
+      <MenuCard
+        title="Preferencias de Usuarios"
+        description="Ver y gestionar preferencias de usuarios"
+        href="/user-preferences"
+        icon={<Settings className="h-6 w-6" />}
+      />
+      <MenuCard
+        title="Perfiles Geminis"
+        description="Gestión de perfiles generados por Gemini"
+        href="/user-profiles-geminis"
+        icon={<Sparkles className="h-6 w-6" />}
       />
     </div>
   )

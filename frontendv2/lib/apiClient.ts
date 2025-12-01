@@ -53,6 +53,25 @@ export interface ActividadAlternativa {
   promptConsultaGemini: string;
 }
 
+export interface UserPreferences {
+  _id?: string;
+  email: string;
+  periodo: string;
+  horarioClases: string;
+  mascota: string;
+  responsabilidadesEnCasa: string;
+  espacioOrdenado: string;
+  actividadesAireLibre: string;
+  actividadesEnCasa: string;
+  motivacion: string;
+}
+
+export interface UserProfileGeminis {
+  _id?: string;
+  email: string;
+  respuestaGemini?: string;
+}
+
 export interface PaginationInfo {
   page: number;
   limit: number;
@@ -305,6 +324,115 @@ class ApiClient {
         actividades: data.items || data,
         pagination: data.pagination
       };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  // User Preferences methods
+  async loadUserPreferences(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ success: boolean; preferences?: UserPreferences[]; pagination?: PaginationInfo; error?: string }> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+      const url = `${API_BASE}/user-preferences${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const res = await fetch(url, {
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al cargar preferencias de usuario" };
+      }
+      
+      return { 
+        success: true, 
+        preferences: data.items || data,
+        pagination: data.pagination
+      };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  // User Profile Geminis methods
+  async loadUserProfileGeminis(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ success: boolean; profiles?: UserProfileGeminis[]; pagination?: PaginationInfo; error?: string }> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+      const url = `${API_BASE}/user-profile-geminis${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const res = await fetch(url, {
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al cargar perfiles de Gemini" };
+      }
+      
+      return { 
+        success: true, 
+        profiles: data.items || data,
+        pagination: data.pagination
+      };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  async createUserProfileGeminis(profile: { email: string; respuestaGemini?: string }): Promise<{ success: boolean; profile?: UserProfileGeminis; error?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/user-profile-geminis`, {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(profile)
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al crear perfil de Gemini" };
+      }
+      
+      return { success: true, profile: data };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  async deleteUserProfileGeminis(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/user-profile-geminis/${encodeURIComponent(email)}`, {
+        method: "DELETE",
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al eliminar perfil de Gemini" };
+      }
+      
+      return { success: true };
     } catch (error) {
       return { success: false, error: "Error de conexión" };
     }
