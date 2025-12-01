@@ -65,7 +65,7 @@ export default function CreateUserPage() {
         email: formData.email,
         cedula: formData.cedula,
         edad: parseInt(formData.edad),
-        genero: formData.genero,
+        genero: formData.genero.toLowerCase(),
         so: formData.so,
         movilidad: formData.movilidad,
         tiempoDiario: formData.tiempoDiario,
