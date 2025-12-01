@@ -14,9 +14,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { apiClient, type UserRegister } from "@/lib/apiClient"
 import { useRequireAuth } from "@/lib/auth"
-import { Plus, ArrowLeft } from "lucide-react"
+import { Plus, ArrowLeft, Trash2 } from "lucide-react"
 
 export default function UsersPage() {
   useRequireAuth()
@@ -30,6 +38,9 @@ export default function UsersPage() {
     total: 0,
     totalPages: 1,
   })
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<UserRegister | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -54,6 +65,41 @@ export default function UsersPage() {
   const handleSearch = (value: string) => {
     setSearch(value)
     setPagination((p) => ({ ...p, page: 1 }))
+  }
+
+  const handleDeleteClick = (user: UserRegister) => {
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete?.email) return
+
+    setDeleting(true)
+    const result = await apiClient.deleteUserRegister(userToDelete.email)
+    
+    if (result.success) {
+      // Remove the user from the list
+      setUsers(users.filter((u) => u._id !== userToDelete._id))
+      setDeleteDialogOpen(false)
+      setUserToDelete(null)
+      
+      // If we're on the last page and it becomes empty, go to previous page
+      if (users.length === 1 && pagination.page > 1) {
+        setPagination((p) => ({ ...p, page: p.page - 1 }))
+      } else {
+        // Reload to refresh pagination info
+        loadUsers()
+      }
+    } else {
+      alert(result.error || "Error al eliminar usuario")
+    }
+    setDeleting(false)
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setUserToDelete(null)
   }
 
   return (
@@ -110,6 +156,7 @@ export default function UsersPage() {
                       <TableHead>SO</TableHead>
                       <TableHead>Tiempo Diario</TableHead>
                       <TableHead>Movilidad</TableHead>
+                      <TableHead className="w-[100px]">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -124,6 +171,15 @@ export default function UsersPage() {
                         <TableCell>{user.so}</TableCell>
                         <TableCell>{user.tiempoDiario}</TableCell>
                         <TableCell>{user.movilidad}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteClick(user)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -158,6 +214,35 @@ export default function UsersPage() {
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar eliminación</DialogTitle>
+              <DialogDescription>
+                ¿Está seguro de que desea eliminar el usuario{" "}
+                <span className="font-semibold">{userToDelete?.email}</span>?
+                Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleDeleteCancel}
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+              >
+                {deleting ? "Eliminando..." : "Eliminar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
