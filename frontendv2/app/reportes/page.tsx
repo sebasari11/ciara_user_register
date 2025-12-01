@@ -12,10 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { apiClient, type Reporte } from "@/lib/apiClient"
 import { useRequireAuth } from "@/lib/auth"
-import { ArrowLeft, ArrowUpDown } from "lucide-react"
+import { ArrowLeft, ArrowUpDown, Trash2 } from "lucide-react"
 
 export default function ReportesPage() {
   useRequireAuth()
@@ -31,6 +40,11 @@ export default function ReportesPage() {
     total: 0,
     totalPages: 1,
   })
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [reporteToDelete, setReporteToDelete] = useState<Reporte | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [adminPwd, setAdminPwd] = useState("")
+  const [passwordError, setPasswordError] = useState("")
 
   useEffect(() => {
     loadReportes()
@@ -62,6 +76,48 @@ export default function ReportesPage() {
       setSortOrder("asc")
     }
     setPagination((p) => ({ ...p, page: 1 }))
+  }
+
+  const handleDeleteClick = (reporte: Reporte) => {
+    setReporteToDelete(reporte)
+    setAdminPwd("")
+    setPasswordError("")
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!reporteToDelete?._id) return
+
+    if (!adminPwd.trim()) {
+      setPasswordError("Por favor ingresa la contraseña de administrador")
+      return
+    }
+
+    setPasswordError("")
+    setDeleting(true)
+    
+    const result = await apiClient.deleteReporte(reporteToDelete._id, adminPwd)
+    setDeleting(false)
+
+    if (result.success) {
+      setDeleteDialogOpen(false)
+      setReporteToDelete(null)
+      setAdminPwd("")
+      setPasswordError("")
+      // Reload reportes
+      await loadReportes()
+    } else {
+      setPasswordError(result.error || "Error al eliminar el reporte")
+    }
+  }
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setDeleteDialogOpen(false)
+      setReporteToDelete(null)
+      setAdminPwd("")
+      setPasswordError("")
+    }
   }
 
   const formatDate = (date: string | Date): string => {
@@ -163,6 +219,7 @@ export default function ReportesPage() {
                         <TableHead>Email</TableHead>
                         <TableHead>Mayor Consumo</TableHead>
                         <TableHead>Aplicaciones y Tiempo de Uso</TableHead>
+                        <TableHead className="w-[100px]">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -172,6 +229,16 @@ export default function ReportesPage() {
                           <TableCell>{reporte.email}</TableCell>
                           <TableCell>{reporte.mayorConsumo}</TableCell>
                           <TableCell>{renderPackages(reporte)}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteClick(reporte)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -208,6 +275,61 @@ export default function ReportesPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar el reporte del usuario{" "}
+              <strong>{reporteToDelete?.email}</strong> del{" "}
+              <strong>{reporteToDelete ? formatDate(reporteToDelete.fecha) : ""}</strong>?
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-pwd">Contraseña de administrador</Label>
+              <Input
+                id="admin-pwd"
+                type="password"
+                placeholder="Ingresa la contraseña de administrador"
+                value={adminPwd}
+                onChange={(e) => {
+                  setAdminPwd(e.target.value)
+                  setPasswordError("")
+                }}
+                disabled={deleting}
+                className={passwordError ? "border-destructive" : ""}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !deleting && adminPwd.trim()) {
+                    handleDeleteConfirm()
+                  }
+                }}
+              />
+              {passwordError && (
+                <p className="text-sm text-destructive">{passwordError}</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => handleDialogClose(false)}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleting || !adminPwd.trim()}
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

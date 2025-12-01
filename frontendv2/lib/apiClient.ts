@@ -29,7 +29,7 @@ export interface UserRegister {
 }
 
 export interface Reporte {
-  _id?: string;
+  _id: string;
   email: string;
   fecha: string | Date;
   mayorConsumo: string;
@@ -250,6 +250,25 @@ class ApiClient {
         reportes: data.items || data,
         pagination: data.pagination
       };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  async deleteReporte(id: string, adminPwd: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/reportes/${id}`, {
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ adminPwd })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al eliminar reporte" };
+      }
+      
+      return { success: true };
     } catch (error) {
       return { success: false, error: "Error de conexión" };
     }
