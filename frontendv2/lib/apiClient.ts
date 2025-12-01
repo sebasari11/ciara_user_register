@@ -45,6 +45,14 @@ export interface Reporte {
   tiempoUso5: number;
 }
 
+export interface ActividadAlternativa {
+  _id?: string;
+  emailUser: string;
+  respuestaConsultaGemini: string;
+  horaActual: string | Date;
+  promptConsultaGemini: string;
+}
+
 export interface PaginationInfo {
   page: number;
   limit: number;
@@ -193,6 +201,24 @@ class ApiClient {
     }
   }
 
+  async deleteUserRegister(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/user-register/${encodeURIComponent(email)}`, {
+        method: "DELETE",
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al eliminar usuario" };
+      }
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
   // Reportes methods
   async loadReportes(params?: {
     search?: string;
@@ -222,6 +248,42 @@ class ApiClient {
       return { 
         success: true, 
         reportes: data.items || data,
+        pagination: data.pagination
+      };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
+  // Actividades Alternativas methods
+  async loadActividadesAlternativas(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ success: boolean; actividades?: ActividadAlternativa[]; pagination?: PaginationInfo; error?: string }> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+      const url = `${API_BASE}/actividades-alternativas${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const res = await fetch(url, {
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, error: data.error || "Error al cargar actividades alternativas" };
+      }
+      
+      return { 
+        success: true, 
+        actividades: data.items || data,
         pagination: data.pagination
       };
     } catch (error) {
