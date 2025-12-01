@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listReportes } from "../controllers/reportes.controller.js";
+import { listReportes, deleteReporte } from "../controllers/reportes.controller.js";
 import { authRequired } from "../middleware/auth.js";
 
 const router = Router();
@@ -63,5 +63,73 @@ const router = Router();
  *                   example: "Token requerido"
  */
 router.get("/", authRequired, listReportes);
+
+/**
+ * @swagger
+ * /api/reportes/{id}:
+ *   delete:
+ *     summary: Eliminar un reporte
+ *     description: Elimina un reporte por su ID
+ *     tags: [Reportes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del reporte a eliminar
+ *         example: "666666666666666666666666"
+ *       - in: body
+ *         name: adminPwd
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Contraseña de administrador
+ *         example: "123456"
+ *     responses:
+ *       200:
+ *         description: Reporte eliminado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Reporte eliminado correctamente"
+ *       404:
+ *         description: Reporte no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Reporte no encontrado"
+ *       401:
+ *         description: Token requerido o inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Token requerido"
+ *       500:
+ *         description: Error del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "No se pudo eliminar el reporte"
+ */
+router.delete("/:id", authRequired, deleteReporte);
 
 export default router;

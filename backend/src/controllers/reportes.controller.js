@@ -46,3 +46,29 @@ export const listReportes = async (req, res) => {
         res.status(500).json({ error: "No se pudo listar los reportes" });
     }
 }
+
+export const deleteReporte = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminPwd = req.body.adminPwd;
+
+        const adminPassword = process.env.ADMIN_PWD;
+        if (!adminPassword) {
+            return res.status(500).json({ error: "Configuración de administrador no encontrada" });
+        }
+
+        if (!adminPwd || adminPwd !== adminPassword) {
+            return res.status(401).json({ error: "Contraseña de administrador incorrecta" });
+        }
+
+        const reporte = await Reportes.findByIdAndDelete(id);
+        if (!reporte) {
+            return res.status(404).json({ error: "Reporte no encontrado" });
+        }
+
+        res.json({ message: "Reporte eliminado correctamente", reporte });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "No se pudo eliminar el reporte" });
+    }
+}
