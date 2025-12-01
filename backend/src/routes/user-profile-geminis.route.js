@@ -6,3 +6,4 @@ const router = Router();
 router.get("/", authRequired, listUserProfileGeminis);
 router.post("/", authRequired, createUserProfileGeminis);
 router.delete("/:email", authRequired, deleteUserProfileGeminis);
+export default router;
