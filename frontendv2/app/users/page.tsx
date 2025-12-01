@@ -108,6 +108,8 @@ export default function UsersPage() {
                       <TableHead>Universidad</TableHead>
                       <TableHead>Carrera</TableHead>
                       <TableHead>SO</TableHead>
+                      <TableHead>Tiempo Diario</TableHead>
+                      <TableHead>Movilidad</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -120,6 +122,8 @@ export default function UsersPage() {
                         <TableCell>{user.universidad}</TableCell>
                         <TableCell>{user.carrera}</TableCell>
                         <TableCell>{user.so}</TableCell>
+                        <TableCell>{user.tiempoDiario}</TableCell>
+                        <TableCell>{user.movilidad}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
