@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText } from "lucide-react"
+import { Users, FileText, Activity } from "lucide-react"
 
 interface MenuCardProps {
   title: string
@@ -43,6 +43,12 @@ export function MenuCards() {
         description="Ver reportes de uso de aplicaciones"
         href="/reportes"
         icon={<FileText className="h-6 w-6" />}
+      />
+      <MenuCard
+        title="Actividades Alternativas"
+        description="Consultas y respuestas de Gemini"
+        href="/actividades-alternativas"
+        icon={<Activity className="h-6 w-6" />}
       />
     </div>
   )
