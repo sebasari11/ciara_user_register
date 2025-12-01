@@ -98,3 +98,17 @@ export const checkEmailExists = async (req, res) => {
     res.status(500).json({ error: "Error al verificar email" });
   }
 };
+
+export const deleteUserRegister = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const userRegister = await UserRegister.findOneAndDelete({ email: email.toLowerCase().trim() });
+    if (!userRegister) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json({ message: "Usuario eliminado correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "No se pudo eliminar el registro de usuario" });
+  }
+};
