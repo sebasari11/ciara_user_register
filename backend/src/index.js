@@ -9,6 +9,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRegisterRoutes from "./routes/user-register.routes.js";
 import reportesRoutes from "./routes/reportes.routes.js";
+import actividadesAlternativasRoutes from "./routes/actividades-alternativas.routes.js";
 
 dotenv.config();
 const app = express();
@@ -54,7 +55,7 @@ app.get("/api/health", (req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use("/api/auth", authRoutes);
 app.use("/api/user-register", userRegisterRoutes);
 app.use("/api/reportes", reportesRoutes);
-
+app.use("/api/actividades-alternativas", actividadesAlternativasRoutes);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`API escuchando en puerto ${PORT}`);
