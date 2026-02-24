@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label"
 import { apiClient, type Reporte } from "@/lib/apiClient"
 import { useRequireAuth } from "@/lib/auth"
 import { ArrowLeft, ArrowUpDown, Trash2 } from "lucide-react"
+import { DownloadReportsButton } from "@/components/download-reports-button"
 
 export default function ReportesPage() {
   useRequireAuth()
@@ -175,7 +176,7 @@ export default function ReportesPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <CardTitle>Reportes</CardTitle>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
                 <Input
                   placeholder="Buscar por email, fecha, mayor consumo..."
                   value={search}
@@ -185,6 +186,7 @@ export default function ReportesPage() {
                   }}
                   className="max-w-sm"
                 />
+                <DownloadReportsButton variant="default" size="sm" />
                 <Button
                   variant="outline"
                   size="sm"

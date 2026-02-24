@@ -293,6 +293,40 @@ class ApiClient {
     }
   }
 
+  async downloadReportesCSV(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const token = this.getToken();
+      const res = await fetch(`${API_BASE}/reportes/download-csv`, {
+        method: "GET",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        return { success: false, error: data.error || "Error al descargar reportes" };
+      }
+      
+      // Convertir respuesta a Blob
+      const blob = await res.blob();
+      
+      // Crear URL temporal y disparar descarga
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "reportes_completo.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Error de conexión" };
+    }
+  }
+
   // Actividades Alternativas methods
   async loadActividadesAlternativas(params?: {
     page?: number;
