@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listReportes, deleteReporte } from "../controllers/reportes.controller.js";
+import { listReportes, deleteReporte, downloadReportesCSV } from "../controllers/reportes.controller.js";
 import { authRequired } from "../middleware/auth.js";
 
 const router = Router();
@@ -63,6 +63,46 @@ const router = Router();
  *                   example: "Token requerido"
  */
 router.get("/", authRequired, listReportes);
+
+/**
+ * @swagger
+ * /api/reportes/download-csv:
+ *   get:
+ *     summary: Descargar todos los reportes en formato CSV
+ *     description: Descarga todos los reportes de la colección en formato CSV
+ *     tags: [Reportes]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Archivo CSV con todos los reportes
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       401:
+ *         description: Token requerido o inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Token requerido"
+ *       500:
+ *         description: Error del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "No se pudo generar el archivo CSV"
+ */
+router.get("/download-csv", authRequired, downloadReportesCSV);
 
 /**
  * @swagger
